@@ -8,6 +8,8 @@
 
 namespace g2o {
   class VertexSE3;
+  class HyperGraph;
+  class SparseOptimizer;
 }
 
 namespace hdl_graph_slam {
@@ -22,9 +24,14 @@ public:
   using Ptr = std::shared_ptr<KeyFrame>;
 
   KeyFrame(const ros::Time& stamp, const Eigen::Isometry3d& odom, double accum_distance, const pcl::PointCloud<PointT>::ConstPtr& cloud);
-  ~KeyFrame();
+  KeyFrame(const std::string& directory, g2o::HyperGraph* graph);
+  virtual ~KeyFrame();
 
-  void dump(const std::string& directory);
+  void save(const std::string& directory);
+  bool load(const std::string& directory, g2o::HyperGraph* graph);
+
+  long id() const;
+  Eigen::Isometry3d estimate() const;
 
 public:
   ros::Time stamp;                                // timestamp
@@ -33,6 +40,9 @@ public:
   pcl::PointCloud<PointT>::ConstPtr cloud;        // point cloud
   boost::optional<Eigen::Vector4d> floor_coeffs;  // detected floor's coefficients
   boost::optional<Eigen::Vector3d> utm_coord;     // UTM coord obtained by GPS
+
+  boost::optional<Eigen::Vector3d> acceleration;   //
+  boost::optional<Eigen::Quaterniond> orientation; //
 
   g2o::VertexSE3* node;                           // node instance
 };
